@@ -78,6 +78,7 @@ class WP_REST_React_Controller extends WP_REST_Controller {
 		$prepared_args = array(
 			'post__in' => $request['post'],
 			'type'     => 'reaction',
+			'status'   => 'approve' // only show approved comments
 		);
 
 		/**
@@ -128,7 +129,7 @@ class WP_REST_React_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to create a reaction
+	 * Check if a given request has access to create a reaction. This goes as comment permissions.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -153,13 +154,19 @@ class WP_REST_React_Controller extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
+
 		$comment = array(
-			'comment_content' => $request['emoji'],
-			'comment_post_ID' => $request['post'],
+			'comment' => esc_attr( $request['emoji'] ),
+			'comment_post_ID' => (int) $request['post'],
 			'comment_type'    => 'reaction',
 		);
 
-		wp_insert_comment( $comment );
+		$submitted = wp_handle_comment_submission( $comment ); // this does all of our comment checks but it only 
+		if( !is_wp_error( $submitted ) ){
+			$comment_array['comment_ID'] = $submitted->comment_ID;
+			$comment_array['comment_type'] = 'reaction';
+			wp_update_comment( $comment_array ); // it would be nice to fix wp_handle_comment_submission and allow comment types
+		}
 
 		return $this->get_items( $request );
 	}
@@ -187,7 +194,7 @@ class WP_REST_React_Controller extends WP_REST_Controller {
 	 */
 	public function prepare_item_for_response( $reaction, $request ) {
 		$data = array(
-			'emoji'   => $reaction['emoji'],
+			'emoji'   => esc_attr( $reaction['emoji'] ),
 			'count'   => (int) $reaction['count'],
 			'post_id' => (int) $reaction['post_id'],
 		);

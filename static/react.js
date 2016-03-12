@@ -48,6 +48,7 @@
 		el = event.target || event.srcElement;
 
 		parent = el;
+
 		while ( parent ) {
 			if ( 'DIV' === parent.nodeName && parent.className && typeof parent.className === 'string' && parent.className.indexOf( 'emoji-reaction' ) !== -1 ) {
 				break;
@@ -72,7 +73,7 @@
 			event.preventDefault();
 			event.stopPropagation();
 			changeReactionTab( parent.dataset.tab );
-		} else if ( parent.className.indexOf( 'emoji-reaction' ) !== -1 ) {
+		} else if ( parent.className.indexOf( 'emoji-reaction' ) !== -1 && parent.className.indexOf( 'open' ) !== -1 ) {
 			event.preventDefault();
 			event.stopPropagation();
 			react( parent );
@@ -117,8 +118,8 @@
 				}
 
 				character = String.fromCodePoint.apply( this, emoji[ ii ][ jj ] );
-
-				html += '<div data-emoji="' + character + '" class="emoji-reaction"><div class="emoji">';
+				// why? well, the duplicate comment check gets confused by emojis so I'm storing them as their unicode character which works
+				html += '<div data-emoji="' + emoji[ ii ][ jj ] + '" class="emoji-reaction open"><div class="emoji">';
 				html += character;
 				html += '</div></div>';
 			}
@@ -175,6 +176,7 @@
 	 * @param  int tab_number The tab number to switch to.
 	 */
 	var changeReactionTab = function( tab_number ) {
+
 		var ii;
 		for( ii = 0; ii <= 7; ii++ ) {
 			tab = popup.getElementsByClassName( 'container-' + ii );
@@ -183,7 +185,7 @@
 			}
 			tab = tab[0];
 
-			if ( ii === tab_number ) {
+			if ( ii === parseInt( tab_number ) ) {
 				tab.style.display = 'block';
 			} else {
 				tab.style.display = 'none';
@@ -212,6 +214,7 @@
 		xhr.open( 'POST', settings.endpoint, true );
 
 		xhr.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
+		xhr.setRequestHeader( 'X-WP-Nonce', WP_API_Settings.nonce );  // allow it to pick up cookies to test for logged in users
 
 		xhr.send( params );
 	};

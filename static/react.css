@@ -6,12 +6,17 @@
 .emoji-reaction-add {
 	width: 60px;
 	float: left;
-	border: 1px solid black;
-	cursor: pointer;
+	border: 1px solid #ccc;
 	box-sizing: border-box;
+	margin: 0 1px;
 }
 
-.emoji-reaction:hover,
+.emoji-reaction.open,
+.emoji-reaction-add{
+	cursor: pointer;
+}
+
+.emoji-reaction.open:hover,
 .emoji-reaction-add:hover {
 	border-color: red;
 }
@@ -22,7 +27,7 @@
 	text-align: center;
 }
 
-.emoji-reaction .count {
+.emoji-reaction .count, .emoji-reaction-add .count {
 	font-family: Helvetica, Arial, sans-serif;
 	font-size: 14px;
 	background-color: #eee

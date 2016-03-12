@@ -70,6 +70,8 @@ class React {
 		wp_enqueue_style( 'react-emoji', REACT_URL . '/static/react.css' );
 
 		wp_enqueue_script( 'react-emoji', REACT_URL . '/static/react.js', array(), false, true );
+		wp_localize_script( 'react-emoji', 'WP_API_Settings', array( 'nonce' => wp_create_nonce( 'wp_rest' ) ) );
+
 	}
 
 	/**
@@ -86,6 +88,7 @@ class React {
 		$reactions = get_comments( array(
 			'post_id' => $post_id,
 			'type'    => 'reaction',
+			'status'  => 'approve' // only show approved comments
 		) );
 
 		$reactions_summary = array();
@@ -99,13 +102,18 @@ class React {
 
 		$content .= '<div class="emoji-reactions">';
 
+		$comments_open =  comments_open( $post_id ) && ( !empty( get_option( 'comment_registration' ) ) && is_user_logged_in() ) || empty( get_option( 'comment_registration' ) ); // are the comments open for this post?
+		$emoji_class = ( $comments_open ) ? 'open' : 'closed';
+
 		foreach ( $reactions_summary as $emoji => $count ) {
-			$content .= "<div data-emoji='$emoji' data-count='$count' data-post='$post_id' class='emoji-reaction'><div class='emoji'>$emoji</div><div class='count'>$count</div></div>";
+			// Mmmm, don't undo the emojis already there, ok? I mean, later maybe but for now.
+			$emoji_rendered = ( substr( $emoji, 0, 2 ) === '0x' ) ?  '&#' . substr( $emoji, 1 ) . ';' : $emoji;
+			$content .= "<div data-emoji='$emoji' data-count='$count' data-post='$post_id' class='emoji-reaction $emoji_class'><div class='emoji'>$emoji_rendered</div><div class='count'>$count</div></div>";
 		}
 
-		if ( comments_open( $post_id ) ) {
+		if ( $comments_open ){
 			/* translators: This is the emoji used for the "Add new emoji reaction" button */
-			$content .= "<div data-post='$post_id' class='emoji-reaction-add'><div class='emoji'>" . __( '😃+', 'react' ) . '</div></div>';
+			$content .= "<div data-post='$post_id' class='emoji-reaction-add'><div class='emoji'>" . __( '😃', 'react' ) . '</div><div class="count">+</div></div>';
 		}
 		$content .= '</div>';
 		return $content;
