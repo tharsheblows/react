@@ -161,14 +161,14 @@ class WP_REST_React_Controller extends WP_REST_Controller {
 			'comment_type'    => 'reaction',
 		);
 
-		$submitted = wp_handle_comment_submission( $comment ); // this does all of our comment checks but it only 
+		$submitted = wp_handle_comment_submission( $comment ); // this does all of our comment checks for valid post, authorization etc
 		if( !is_wp_error( $submitted ) ){
-			$comment_array['comment_ID'] = $submitted->comment_ID;
+			$comment_array['comment_ID'] = (int)$submitted->comment_ID;
 			$comment_array['comment_type'] = 'reaction';
 			wp_update_comment( $comment_array ); // it would be nice to fix wp_handle_comment_submission and allow comment types
 		}
 
-		return $this->get_items( $request );
+		return $comment;
 	}
 
 	/**

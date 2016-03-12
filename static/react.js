@@ -200,6 +200,9 @@
 	 */
 	var react = function( el ) {
 		var post, params, xhr;
+		
+		var parent = el;
+		while ( ( parent = parent.parentElement) && !parent.classList.contains( 'emoji-reactions' ) ); // get emoji reactions div
 
 		if ( el.dataset.post ) {
 			post = el.dataset.post;
@@ -212,6 +215,26 @@
 		xhr = new XMLHttpRequest();
 
 		xhr.open( 'POST', settings.endpoint, true );
+
+		xhr.onload = function( e ) {
+		    if ( xhr.status === 200 ) {
+		       var data = JSON.parse( xhr.responseText );
+		       var parent_id = parseInt( data.comment_post_ID );
+		       var emoji_saved = data.comment;
+		       var emoji_reactions = document.querySelector( '#post-' + parent_id + ' .emoji-reactions' );
+		       var same_emoji_reaction = emoji_reactions.querySelector( '.emoji-reaction > [data-emoji="' + emoji_saved + '"]' );
+		       if( same_emoji_reaction && same_emoji_reaction.length > 0 ){
+		       		var same_emoji_reaction_count = same_emoji_reaction.querySelector( '.count' ).textContent;
+		       		console.log( textContent );
+		       }
+		       else{
+
+		       }
+		    }
+		    else if( xhr.status === 409 ) {
+		        console.log( ':( ' + xhr.status );
+		    }
+		};
 
 		xhr.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
 		xhr.setRequestHeader( 'X-WP-Nonce', WP_API_Settings.nonce );  // allow it to pick up cookies to test for logged in users

@@ -105,9 +105,15 @@ class React {
 		$comments_open =  comments_open( $post_id ) && ( !empty( get_option( 'comment_registration' ) ) && is_user_logged_in() ) || empty( get_option( 'comment_registration' ) ); // are the comments open for this post?
 		$emoji_class = ( $comments_open ) ? 'open' : 'closed';
 
-		foreach ( $reactions_summary as $emoji => $count ) {
+		foreach ( $reactions_summary as $emoji_raw => $count ) {
+			$emoji_array = $emoji_rendered_array = array();
+
 			// Mmmm, don't undo the emojis already there, ok? I mean, later maybe but for now.
-			$emoji_rendered = ( substr( $emoji, 0, 2 ) === '0x' ) ?  '&#' . substr( $emoji, 1 ) . ';' : $emoji;
+			$emoji_array = explode( ',', $emoji_raw );
+			foreach( $emoji_array as $emoji ){
+				$emoji_rendered_array[] = ( substr( $emoji, 0, 2 ) === '0x' ) ?  '&#' . substr( $emoji, 1 ) : $emoji;
+			}
+			$emoji_rendered = implode( '', $emoji_rendered_array );
 			$content .= "<div data-emoji='$emoji' data-count='$count' data-post='$post_id' class='emoji-reaction $emoji_class'><div class='emoji'>$emoji_rendered</div><div class='count'>$count</div></div>";
 		}
 

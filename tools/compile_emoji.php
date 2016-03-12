@@ -7,6 +7,12 @@ file_put_contents( dirname( __DIR__ ) . '/static/emoji-raw.json', $contents );
 $data = json_decode( $contents );
 $map = array();
 
+$modifier_file = file_get_contents( dirname( __DIR__ ) . '/static/emoji-modifier-base.json' );
+$modifier_obj = json_decode( $modifier_file );
+
+$modifier_base_array = $modifier_obj->modifier_base;
+$modifiers_array = $modifier_obj->modifiers;
+
 $categories = array( 'People', 'Nature', 'Foods', 'Activity', 'Places', 'Objects', 'Symbols', 'Flags' );
 
 foreach ( $data as $emoji ) {
@@ -23,14 +29,27 @@ foreach ( $data as $emoji ) {
 			$category = 100;
 		}
 	}
+
 	$code = "0x" . $emoji->unified;
 	$code = str_replace( '-', "-0x", $code );
 	$code = explode( '-', $code );
 
-	$map[ $category ][] = array(
-		'code'       => $code,
-		'sort_order' => $emoji->sort_order,
-	);
+	if( array_intersect( $code, $modifier_base_array ) && count( $code ) === 1 ){
+		foreach( $modifiers_array as $modifier ){
+				$code_array = $code;
+				$code_array[] = $modifier;
+				$map[ $category ][] = array(
+					'code'       => $code_array,
+					'sort_order' => $emoji->sort_order,
+				);
+		}
+	}
+	else{
+		$map[ $category ][] = array(
+			'code'       => $code,
+			'sort_order' => $emoji->sort_order,
+		);
+	}
 }
 
 ksort( $map );
