@@ -161,6 +161,8 @@ class WP_REST_React_Controller extends WP_REST_Controller {
 			'comment_type'    => 'reaction',
 		);
 
+		$comment['comment_rendered'] = $request['emoji_rendered'];
+
 		$submitted = wp_handle_comment_submission( $comment ); // this does all of our comment checks for valid post, authorization etc
 		if( !is_wp_error( $submitted ) ){
 			$comment_array['comment_ID'] = (int)$submitted->comment_ID;

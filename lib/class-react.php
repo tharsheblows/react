@@ -114,7 +114,7 @@ class React {
 				$emoji_rendered_array[] = ( substr( $emoji, 0, 2 ) === '0x' ) ?  '&#' . substr( $emoji, 1 ) : $emoji;
 			}
 			$emoji_rendered = implode( '', $emoji_rendered_array );
-			$content .= "<div data-emoji='$emoji_raw' data-count='$count' data-post='$post_id' class='emoji-reaction $emoji_class'><div class='emoji'>$emoji_rendered</div><div class='count'>$count</div></div>";
+			$content .= "<div data-emoji='$emoji_raw' data-emoji-rendered='$emoji_rendered' data-count='$count' data-post='$post_id' class='emoji-reaction $emoji_class'><div class='emoji'>$emoji_rendered</div><div class='count'>$count</div></div>";
 		}
 
 		if ( $comments_open ){

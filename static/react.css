@@ -20,6 +20,10 @@
 	cursor: pointer;
 }
 
+.emoji-reaction.highlight{
+	border-color: yellow;
+}
+
 .emoji-reaction.open:hover,
 .emoji-reaction-add:hover {
 	border-color: red;

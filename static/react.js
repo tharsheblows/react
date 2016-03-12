@@ -119,7 +119,7 @@
 
 				character = String.fromCodePoint.apply( this, emoji[ ii ][ jj ] );
 				// why? well, the duplicate comment check gets confused by emojis so I'm storing them as their unicode character which works
-				html += '<div data-emoji="' + emoji[ ii ][ jj ] + '" class="emoji-reaction open"><div class="emoji">';
+				html += '<div data-emoji="' + emoji[ ii ][ jj ] + '" data-emoji-rendered="' + character + '" class="emoji-reaction open"><div class="emoji">';
 				html += character;
 				html += '</div></div>';
 			}
@@ -210,7 +210,7 @@
 			post = el.parentElement.parentElement.dataset.post;
 		}
 
-		params = 'post=' + post + '&emoji=' + el.dataset.emoji;
+		params = 'post=' + post + '&emoji=' + el.dataset.emoji + '&emoji_rendered=' + el.dataset.emojiRendered;
 
 		xhr = new XMLHttpRequest();
 
@@ -219,16 +219,23 @@
 		xhr.onload = function( e ) {
 		    if ( xhr.status === 200 ) {
 		       var data = JSON.parse( xhr.responseText );
+
 		       var parent_id = parseInt( data.comment_post_ID );
+
 		       var emoji_saved = data.comment;
+		       var emoji_rendered = data.comment_rendered;
+
 		       var emoji_reactions = document.querySelector( '#post-' + parent_id + ' .emoji-reactions' );
-		       var same_emoji_reaction = emoji_reactions.querySelector( '.emoji-reaction > [data-emoji="' + emoji_saved + '"]' );
-		       if( same_emoji_reaction && same_emoji_reaction.length > 0 ){
+		       var same_emoji_reaction = emoji_reactions.querySelector( '.emoji-reaction[data-emoji="' + emoji_saved + '"]' );
+
+		       if( same_emoji_reaction ){
 		       		var same_emoji_reaction_count = same_emoji_reaction.querySelector( '.count' ).textContent;
-		       		console.log( textContent );
+		       		var new_count = parseInt( same_emoji_reaction_count ) + 1;
+		       		same_emoji_reaction.querySelector( '.count' ).textContent = new_count;
 		       }
 		       else{
-
+		       		var new_emoji_reaction = '<div data-emoji="' + emoji_saved + '" data-count="1" data-post="' + parent_id + '" class="emoji-reaction open highlight"><div class="emoji">' + emoji_rendered + '</div><div class="count">1</div></div>';
+		       		emoji_reactions.innerHTML = emoji_reactions.innerHTML + new_emoji_reaction;
 		       }
 		    }
 		    else if( xhr.status === 409 ) {
