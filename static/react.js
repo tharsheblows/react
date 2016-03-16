@@ -211,6 +211,7 @@
 		}
 
 		params = 'post=' + post + '&emoji=' + el.dataset.emoji + '&emoji_rendered=' + el.dataset.emojiRendered;
+		var emoji_reactions = document.querySelector( '#post-' + post + ' .emoji-reactions' );
 
 		xhr = new XMLHttpRequest();
 
@@ -220,12 +221,9 @@
 		    if ( xhr.status === 200 ) {
 		       var data = JSON.parse( xhr.responseText );
 
-		       var parent_id = parseInt( data.comment_post_ID );
-
 		       var emoji_saved = data.comment;
 		       var emoji_rendered = data.comment_rendered;
 
-		       var emoji_reactions = document.querySelector( '#post-' + parent_id + ' .emoji-reactions' );
 		       var same_emoji_reaction = emoji_reactions.querySelector( '.emoji-reaction[data-emoji="' + emoji_saved + '"]' );
 
 		       if( same_emoji_reaction ){
@@ -234,12 +232,27 @@
 		       		same_emoji_reaction.querySelector( '.count' ).textContent = new_count;
 		       }
 		       else{
-		       		var new_emoji_reaction = '<div data-emoji="' + emoji_saved + '" data-count="1" data-post="' + parent_id + '" class="emoji-reaction open highlight"><div class="emoji">' + emoji_rendered + '</div><div class="count">1</div></div>';
+		       		var new_emoji_reaction = '<div data-emoji="' + emoji_saved + '" data-count="1" data-post="' + post + '" class="emoji-reaction open highlight"><div class="emoji">' + emoji_rendered + '</div><div class="count">1</div></div>';
 		       		emoji_reactions.innerHTML = emoji_reactions.innerHTML + new_emoji_reaction;
 		       }
 		    }
 		    else if( xhr.status === 409 ) {
-		        console.log( ':( ' + xhr.status );
+
+		    	var error_message;
+		    	if( xhr.status === 409 ){
+		    		error_message = 'Sorry, you can&rsquo;t have the same reaction more than once.';
+		    	}
+		    	else{
+		    		error_message = 'Sorry, something went wrong.';
+		    	}
+
+		        var error_div = document.createElement( 'div' );
+		        error_div.innerHTML = error_message;
+		        error_div.className = 'error';
+		        console.log( error_div );
+
+		        // understand this here http://stackoverflow.com/questions/4793604/how-to-do-insert-after-in-javascript-without-using-a-library
+		        emoji_reactions.appendChild( error_div );
 		    }
 		};
 

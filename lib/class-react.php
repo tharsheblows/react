@@ -33,6 +33,9 @@ class React {
  		add_filter( 'wp_list_comments_args', array( $this, 'filter_comments' ), 10, 1 );
  		add_filter( 'get_comments_number', array( $this, 'count_comments' ), 10, 2 );
 
+ 		// I can't find a good filter or anything to get out of the duplicate comment die. it would be easier if there were a filter on the wp_die here /src/wp-includes/comment.php#L640 @todo core
+ 		// add_filter( 'duplicate_comment_id', array( $this, 'dont_die_duplicate' ), 10, 2 );
+
  		// can't use 'parse_comment_query' because it changes all comments queries oh
 	}
 
