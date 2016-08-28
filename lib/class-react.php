@@ -30,8 +30,10 @@ class React {
 		add_action( 'wp_footer',     array( $this,      'print_selector'  ) );
 
  		add_filter( 'the_content',   array( $this,      'the_content'     ) );
- 		add_filter( 'wp_list_comments_args', array( $this, 'filter_comments' ), 10, 1 );
- 		add_filter( 'get_comments_number', array( $this, 'count_comments' ), 10, 2 );
+ 		//add_filter( 'wp_list_comments_args', array( $this, 'filter_comments' ), 10, 1 );
+ 		//add_filter( 'wp_list_comments_args', array( $this, 'filter_comment_args' ), 10, 1 );
+ 		add_filter( 'comments_template_query_args', array( $this, 'filter_comment_args' ), 10, 1 );
+ 		//add_filter( 'get_comments_number', array( $this, 'count_comments' ), 10, 2 );
 
  		// I can't find a good filter or anything to get out of the duplicate comment die. it would be easier if there were a filter on the wp_die here /src/wp-includes/comment.php#L640 @todo core
  		// add_filter( 'duplicate_comment_id', array( $this, 'dont_die_duplicate' ), 10, 2 );
@@ -145,7 +147,9 @@ class React {
 	// ooh but I can use get_comment_types so why not, this is probably not the right way but I made soooo 
 	public function count_comments( $count, $post_id ){
 		$comment_types = $this->get_comment_types( $post_id );
-		return $comment_types['comment']['approve'];
+		if( !empty( $comment_types['comment']['approve']) ){
+			return $comment_types['comment']['approve'];
+		}
 	}
 
 	// I don't think there's something like this in core? Or I can't find it, hmmm, that could easily be the case.
@@ -189,6 +193,8 @@ class React {
 		// @todo core hmmm get_comment_statuses needs a filter to add in additional statuses
 		// no wait, get_comment_count uses different words for statuses src/wp-includes/comment.php#L338
 		// let's use 'hold', 'approve' -- not sure on the other ones, so they go to default
+		
+		$comment_types = array();
 
 		foreach( $comment_types_array as $comment_type_data ){
 			$comment_type_data->type = ( empty( $comment_type_data->type ) ) ? 'comment' : $comment_type_data->type;
@@ -207,6 +213,11 @@ class React {
 		}
 
 		return $comment_types;
+	}
+
+	public function filter_comment_args( $comment_args ){
+		$comment_args['type'] = 'reaction';
+		return $comment_args;
 	}
 
 	public function print_selector() {
